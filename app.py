@@ -546,7 +546,7 @@ def trajectory(view, date_index):
 @app.callback(Output('preds', 'figure'),
               [Input('my-dropdowntest', "value"), Input("radiopred", "value"),])
 def update_graph(state , radioval):
-    dropdown = {"New York": "Newyork","California": "California","Colorado": "Colorado","Washington": "Washington",}
+    dropdown = {"New York": "Newyork","California": "California","Colorado": "Colorado","Washington": "Washington","Alaska": "Alaska","Arizona": "Arizona","Arkansas": "Arkansas","Connecticut": "Connecticut","Delaware": "Delaware","District of Columbia": "District of Columbia","Florida": "Florida","Georgia": "Georgia","Hawaii": "Hawaii","Texas": "Texas","Illinois": "Illinois","New Jersey": "New Jersey","New Mexico": "New Mexico","Virginia": "Virginia","Indiana": "Indiana","Ohio": "Ohio",}
     radio = {"Confirmed": "Total Cases", "Recovered": "Recovery", "Deaths": "Deaths", }
     trace1 = []
     trace2 = []
@@ -802,12 +802,12 @@ app.layout  = html.Div([ html.H1(children='Welcome to COVID-19 Dashboard USA',
 ]), 
 dcc.Tab(label='Forecast', children=[
 html.Div([html.H1("Machine Learning", style={"textAlign": "center"}), html.H2("Model Predictions", style={"textAlign": "left"}),
-    dcc.Dropdown(id='my-dropdowntest',value="Newyork",options=[{'label': 'Newyork', 'value': 'New York'},{'label': 'California', 'value': 'California'},{'label': 'Colorado', 'value': 'Colorado'},{'label': 'Washington', 'value': 'Washington'}],
+    dcc.Dropdown(id='my-dropdowntest',value="California",options=[{'label': 'Newyork', 'value': 'New York'},{'label': 'California', 'value': 'California'},{'label': 'Colorado', 'value': 'Colorado'},{'label': 'Washington', 'value': 'Washington'},{'label': 'Alaska', 'value': 'Alaska'},{'label': 'Arizona', 'value': 'Arizona'},{'label': 'Arkansas', 'value': 'Arkansas'},{'label': 'Connecticut', 'value': 'Connecticut'},{'label': 'Delaware', 'value': 'Delaware'},{'label': 'District of Columbia', 'value': 'District of Columbia'},{'label': 'Florida', 'value': 'Florida'},{'label': 'Georgia', 'value': 'Georgia'},{'label': 'Hawaii', 'value': 'Hawaii'},{'label': 'Texas', 'value': 'Texas'},{'label': 'Illinois', 'value': 'Illinois'},{'label': 'New Jersey', 'value': 'New Jersey'},{'label': 'New Mexico', 'value': 'New Mexico'},{'label': 'Virginia', 'value': 'Virginia'},{'label': 'Indiana', 'value': 'Indiana'},{'label': 'Ohio', 'value': 'Ohio'}],
                 style={"display": "block", "margin-left": "auto", "margin-right": "auto", "width": "50%"}),
           dcc.RadioItems(id="radiopred", value="Confirmed", labelStyle={'display': 'inline-block', 'padding': 10},
                          options=[{'label': "Total Cases", 'value': "Confirmed"}, {'label': "Recovery", 'value': "Recovered"},
                                   {'label': "Deaths", 'value': "Deaths"}], style={'textAlign': "center", }),
-     dcc.Graph(id='preds'), 
+     dcc.Graph(id='preds'), dcc.Graph(id='rate'),
 html.H2("Performance Metrics Regression Prediction", style={"textAlign": "left"}), html.P("In this example I used the Facebook Performance Metrics dataset to predict the number of likes I post can get. Training a Random Forest Regressor with 500 estimetors right now online lead an accuracy (%) in the Training set equal to: "),
      html.P("In the Test set, was instead registred an accuracy (%) of:"),
     html.P("In order to achieve these results, all the not a numbers (NaNs) have been eliminated, categorical data has been encoded and the data has been normalized. The R2 score has been used as metric for this exercise and a Train/Test split ratio of 70:30% was used.")],)
