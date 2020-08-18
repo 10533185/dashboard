@@ -9,12 +9,15 @@ import numpy as np
 import plotly
 import plotly.graph_objects as go
 
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import LinearRegression
+#from sklearn.preprocessing import PolynomialFeatures
+#from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 from datetime import date, timedelta
 import datetime
+
+import fbprophet
+from fbprophet import Prophet
 
 app = dash.Dash(__name__)
 server = app.server
@@ -75,7 +78,7 @@ def confirmed(view):
     creates the CUMULATIVE CONFIRMED indicator
     '''
     if view == 'United States':
-        df = data
+        df = df_us
     
     value = df[df['date'] == df['date'].iloc[-1]]['Confirmed'].sum()
     delta = df[df['date'] == df['date'].unique()[-2]]['Confirmed'].sum()
@@ -109,7 +112,7 @@ def active(view):
     creates the CURRENTLY ACTIVE indicator
     '''
     if view == 'United States':
-        df = data
+        df = df_us
     
     value = df[df['date'] == df['date'].iloc[-1]]['Active'].sum()
     delta = df[df['date'] == df['date'].unique()[-2]]['Active'].sum()
@@ -143,7 +146,7 @@ def recovered(view):
     creates the RECOVERED CASES indicator
     '''
     if view == 'United States':
-        df = data
+        df = df_us
 
     value = df[df['date'] == df['date'].iloc[-1]]['Recovered'].sum()
     delta = df[df['date'] == df['date'].unique()[-2]]['Recovered'].sum()
@@ -177,7 +180,7 @@ def deaths(view):
     creates the DEATHS TO DATE indicator
     '''
     if view == 'United States':
-        df = data
+        df = df_us
 
     value = df[df['date'] == df['date'].iloc[-1]]['Deaths'].sum()
     delta = df[df['date'] == df['date'].unique()[-2]]['Deaths'].sum()
@@ -395,29 +398,29 @@ def world_map(view, date_index):
                         '% from previous week',
                     hoverinfo = 'text',
                     mode = 'markers',
-                    marker = dict(reversescale = False,
+                    marker = dict(reversescale = True,
                         autocolorscale = False,
                         symbol = 'circle',
                         size = np.sqrt(df['Confirmed']),
                         sizeref = sizeref,
                         sizemin = 0,
-                        line = dict(width=.5, color='rgba(0, 0, 0)'),
-                        colorscale = 'Reds',
+                        line = dict(width=1, color='rgba(102, 102, 102)'),
+                        colorscale = 'Blues',
                         cmin = 0,
                         color = df['share_of_last_week'],
                         cmax = 100,
                         colorbar = dict(
-                            title = "Percentage of<br>cases occurring in<br>the previous week",
+                            title = "Percentage of <br> cases",
                             thickness = 30)
                         )
                     )
             ],
             'layout': go.Layout(
-                title ='Number of Cumulative Confirmed Cases (size of marker)<br>and Share of New Cases from the Previous Week (color)',
+                title ='County_Wise Spread<br>Over the time period',
                 geo=dict(scope=scope,
                         projection_type=projection_type,
                         showland = True,
-                        landcolor = "rgb(100, 125, 100)",
+                        landcolor = "rgb(229, 229, 229)",
                         showocean = True,
                         oceancolor = "rgb(80, 150, 250)",
                         showcountries=True,
@@ -442,30 +445,14 @@ def trajectory(view, date_index):
     '''
     creates the lower-right chart (trajectory)
     '''
-    if view == 'Worldwide':
-        df = data
-        scope = 'countries'
-        threshold = 1000
-    elif view == 'United States':
+    
+    if view == 'United States':
         df = data[data['Country/Region'] == 'US']
         df = df.drop('Country/Region', axis=1)
         df = df.rename(columns={'Province/State': 'Country/Region'})
         scope = 'states'
         threshold = 1000
-    elif view == 'Europe':
-        df = data[data['Country/Region'].isin(eu)]
-        scope = 'countries'
-        threshold = 1000
-    elif view == 'China':
-        df = data[data['Country/Region'] == 'China']
-        df = df.drop('Country/Region', axis=1)
-        df = df.rename(columns={'Province/State': 'Country/Region'})
-        scope = 'provinces'
-        threshold = 1000
-    else:
-        df = data
-        scope = 'countries'
-        threshold = 1000
+    
 
     date = data['date'].unique()[date_index]
 
@@ -525,7 +512,7 @@ def trajectory(view, date_index):
     return {
         'data': traces,
         'layout': go.Layout(
-                title='Trajectory of Cases<br>({} with greater than {} confirmed cases)'.format(scope, threshold),
+                title='Statewise spread over the time'.format(scope, threshold),
                 xaxis_type="log",
                 yaxis_type="log",
                 xaxis_title='Total Confirmed Cases',
@@ -544,14 +531,14 @@ def trajectory(view, date_index):
 
 
 @app.callback(Output('preds', 'figure'),
-              [Input('my-dropdowntest', "value"), Input("radiopred", "value"),])
-def update_graph(state , radioval):
+              [Input('my-dropdowntest', "value"), Input("radiopred", "value")])
+def update_graph(state, radioval):
     dropdown = {"New York": "Newyork","California": "California","Colorado": "Colorado","Washington": "Washington","Alaska": "Alaska","Arizona": "Arizona","Arkansas": "Arkansas","Connecticut": "Connecticut","Delaware": "Delaware","District of Columbia": "District of Columbia","Florida": "Florida","Georgia": "Georgia","Hawaii": "Hawaii","Texas": "Texas","Illinois": "Illinois","New Jersey": "New Jersey","New Mexico": "New Mexico","Virginia": "Virginia","Indiana": "Indiana","Ohio": "Ohio",}
     radio = {"Confirmed": "Total Cases", "Recovered": "Recovery", "Deaths": "Deaths", }
     trace1 = []
     trace2 = []
-
-    
+    trace3 = []
+    trace4 = []
     
     
 
@@ -575,7 +562,7 @@ def update_graph(state , radioval):
         Total_Cases = df[radioval]
 
         Day = df.groupby(['date'])[radioval].sum()
-        x = np.arange(len(Day))
+        '''x = np.arange(len(Day))
         y = Day.values
         days = x.reshape(-1,1)
 
@@ -601,15 +588,73 @@ def update_graph(state , radioval):
         reg.fit(X,y)
         y_Predict_train = reg.predict(X)
 
-        poly_pred=reg.predict(Poly.transform(future_forecast))
+        poly_pred=reg.predict(Poly.transform(future_forecast))'''
 
+        # Facebook Prophet Model
 
+        global_cases = Day.reset_index()
+        Total_cases = global_cases[["date",radioval]]
+        Total_cases.rename(columns={"date":"ds",radioval:"y"},inplace=True)
+        train = Total_cases
 
-        trace1.append(go.Scatter(x=Dates,y=Total_Cases, mode='lines',
+        m= Prophet()
+        m.add_seasonality(name="monthly",period=30.5,fourier_order=5)
+        # Fit Model
+        m.fit(train)
+        # Future Date
+        future_dates = m.make_future_dataframe(periods=60)
+
+        # Prediction
+        prediction =  m.predict(future_dates)
+
+        
+
+        '''trace1.append(go.Scatter(x=Dates,y=Total_Cases, mode='lines',
             opacity=0.7,name=f'Actual Data',textposition='bottom center',marker = dict(color = 'rgba(16, 112, 2, 0.8)')))
         trace2.append(go.Scatter(x=future_dates,y=poly_pred,mode='lines',line=dict(color='royalblue', width=4, dash='dot'),marker = dict(color = 'rgba(80, 26, 80, 0.8)'),
-            opacity=0.6,name=f'Predicted Data',textposition='bottom center'))
-        traces = [trace1, trace2]
+            opacity=0.6,name=f'Predicted Data',textposition='bottom center'))'''
+
+
+
+        trace1.append(go.Scatter( name = 'Live Data',
+                                mode = 'lines+markers',
+                                x = list(train['ds']),
+                                y = list(train['y']),
+                                marker=dict(
+                                color='#FFBAD2',
+                                line=dict(width=1))))
+
+        trace2.append(go.Scatter(
+    name = 'trend',
+    mode = 'lines',
+    x = list(prediction['ds']),
+    y = list(prediction['yhat']),
+    marker=dict(
+        color='red',
+        line=dict(width=3)
+    )
+))
+
+        trace3.append(go.Scatter(
+    name = 'upper band',
+    mode = 'lines',
+    x = list(prediction['ds']),
+    y = list(prediction['yhat_upper']),
+    line= dict(color='#57b88f'),
+    fill = 'tonexty',
+    fillcolor='rgba(26,150,65,0.15)'
+))
+
+        trace4.append(go.Scatter(
+    name= 'lower band',
+    mode = 'lines',
+    x = list(prediction['ds']),
+    y = list(prediction['yhat_lower']),
+    line= dict(color='#1705ff')
+))
+
+
+        traces = [trace1, trace2, trace4, trace3]
         data = [val for sublist in traces for val in sublist]
         figure = {'data': data,
             'layout': go.Layout(colorway=["#5E0DAC", '#FF4F00', '#375CB1', '#FF7400', '#FFF400', '#FF0056'],
@@ -640,7 +685,7 @@ app.layout  = html.Div([ html.H1(children='Welcome to COVID-19 Dashboard USA',
             options=[{'label': i, 'value': i} for i in ['United States']],
             value='United States',
             labelStyle={'float': 'center', 'display': 'inline-block'}
-            ), style={'textAlign': 'left',
+            ), style={'textAlign': 'center',
                 'color': dash_colors['text'],
                 'width': '100%',
                 'float': 'center',
@@ -801,16 +846,15 @@ app.layout  = html.Div([ html.H1(children='Welcome to COVID-19 Dashboard USA',
 ,
 ]), 
 dcc.Tab(label='Forecast', children=[
-html.Div([html.H1("Machine Learning", style={"textAlign": "center"}), html.H2("Model Predictions", style={"textAlign": "left"}),
-    dcc.Dropdown(id='my-dropdowntest',value="California",options=[{'label': 'Newyork', 'value': 'New York'},{'label': 'California', 'value': 'California'},{'label': 'Colorado', 'value': 'Colorado'},{'label': 'Washington', 'value': 'Washington'},{'label': 'Alaska', 'value': 'Alaska'},{'label': 'Arizona', 'value': 'Arizona'},{'label': 'Arkansas', 'value': 'Arkansas'},{'label': 'Connecticut', 'value': 'Connecticut'},{'label': 'Delaware', 'value': 'Delaware'},{'label': 'District of Columbia', 'value': 'District of Columbia'},{'label': 'Florida', 'value': 'Florida'},{'label': 'Georgia', 'value': 'Georgia'},{'label': 'Hawaii', 'value': 'Hawaii'},{'label': 'Texas', 'value': 'Texas'},{'label': 'Illinois', 'value': 'Illinois'},{'label': 'New Jersey', 'value': 'New Jersey'},{'label': 'New Mexico', 'value': 'New Mexico'},{'label': 'Virginia', 'value': 'Virginia'},{'label': 'Indiana', 'value': 'Indiana'},{'label': 'Ohio', 'value': 'Ohio'}],
+html.Div([html.H1("Machine Learning", style={"textAlign": "center"}), html.H2("Model Forecast", style={"textAlign": "left"}),
+    dcc.Dropdown(id='my-dropdowntest',value="New York",options=[{'label': 'Newyork', 'value': 'New York'},{'label': 'California', 'value': 'California'},{'label': 'Colorado', 'value': 'Colorado'},{'label': 'Washington', 'value': 'Washington'},{'label': 'Alaska', 'value': 'Alaska'},{'label': 'Arizona', 'value': 'Arizona'},{'label': 'Arkansas', 'value': 'Arkansas'},{'label': 'Connecticut', 'value': 'Connecticut'},{'label': 'Delaware', 'value': 'Delaware'},{'label': 'District of Columbia', 'value': 'District of Columbia'},{'label': 'Florida', 'value': 'Florida'},{'label': 'Georgia', 'value': 'Georgia'},{'label': 'Hawaii', 'value': 'Hawaii'},{'label': 'Texas', 'value': 'Texas'},{'label': 'Illinois', 'value': 'Illinois'},{'label': 'New Jersey', 'value': 'New Jersey'},{'label': 'New Mexico', 'value': 'New Mexico'},{'label': 'Virginia', 'value': 'Virginia'},{'label': 'Indiana', 'value': 'Indiana'},{'label': 'Ohio', 'value': 'Ohio'}],
                 style={"display": "block", "margin-left": "auto", "margin-right": "auto", "width": "50%"}),
           dcc.RadioItems(id="radiopred", value="Confirmed", labelStyle={'display': 'inline-block', 'padding': 10},
                          options=[{'label': "Total Cases", 'value': "Confirmed"}, {'label': "Recovery", 'value': "Recovered"},
                                   {'label': "Deaths", 'value': "Deaths"}], style={'textAlign': "center", }),
-     dcc.Graph(id='preds'), dcc.Graph(id='rate'),
-html.H2("Performance Metrics Regression Prediction", style={"textAlign": "left"}), html.P("In this example I used the Facebook Performance Metrics dataset to predict the number of likes I post can get. Training a Random Forest Regressor with 500 estimetors right now online lead an accuracy (%) in the Training set equal to: "),
-     html.P("In the Test set, was instead registred an accuracy (%) of:"),
-    html.P("In order to achieve these results, all the not a numbers (NaNs) have been eliminated, categorical data has been encoded and the data has been normalized. The R2 score has been used as metric for this exercise and a Train/Test split ratio of 70:30% was used.")],)
+ 
+    dcc.Graph(id='preds'), 
+],)
 ], className="container")
 ])
 ])
