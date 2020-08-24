@@ -530,6 +530,7 @@ def trajectory(view, date_index):
         }
 
 
+
 @app.callback(Output('preds', 'figure'),
               [Input('my-dropdowntest', "value"), Input("radiopred", "value")])
 def update_graph(state, radioval):
@@ -625,7 +626,7 @@ def update_graph(state, radioval):
                                 line=dict(width=1))))
 
         trace2.append(go.Scatter(
-    name = 'trend',
+    name = 'forecast',
     mode = 'lines',
     x = list(prediction['ds']),
     y = list(prediction['yhat']),
@@ -790,6 +791,8 @@ app.layout  = html.Div([ html.H1(children='Welcome to COVID-19 Dashboard USA',
         style={'width': '98%', 'float': 'center', 'vertical-align': 'bottom'}
         ),
 
+   
+
     html.Div(dcc.Markdown(' '),
         style={
             'textAlign': 'center',
@@ -826,6 +829,7 @@ app.layout  = html.Div([ html.H1(children='Welcome to COVID-19 Dashboard USA',
             style={'width': '94.74%', 'float': 'left'}),  # width = 1 - (100 - x) / x
         style={'width': '95%', 'float': 'right'}),  # width = x
     
+   
     html.Div(dcc.Markdown('''
             &nbsp;  
             &nbsp;  

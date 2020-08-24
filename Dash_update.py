@@ -334,7 +334,7 @@ def load_daily_reports(source='web'):
     df['Province/State'].replace('Cruise Ship', 'Diamond Princess cruise ship', inplace=True)
     df['Province/State'].replace('From Diamond Princess', 'Diamond Princess cruise ship', inplace=True)
 
-    # Replace old reporting standards
+    # Replace old reporting standards   
     df['Province/State'].replace('Chicago', 'Illinois', inplace=True)
     df['Province/State'].replace('Chicago, IL', 'Illinois', inplace=True)
     df['Province/State'].replace('Cook County, IL', 'Illinois', inplace=True)
@@ -482,7 +482,7 @@ def load_daily_reports(source='web'):
 
     return pd.concat(files, axis=0, ignore_index=True, sort=False)
 
-def etl(layout='time_series', source='web', update='manual'):
+def live_update(layout='time_series', source='web', update='manual'):
     if layout == 'time_series':
         df = load_time_series(source=source, update=update)
         if isinstance(df, str):
@@ -576,7 +576,7 @@ def population_to_us(df, pop_us):
 
 
 def main(update):
-    data = etl('time_series', 'web', update)
+    data = live_update('time_series', 'web', update)
     if isinstance(data, str):
         return
     data.to_csv('data/dashboard_data.csv', index=False)
