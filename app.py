@@ -9,10 +9,8 @@ import numpy as np
 import plotly
 import plotly.graph_objects as go
 
-#from sklearn.preprocessing import PolynomialFeatures
-#from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.model_selection import train_test_split
+
+
 from datetime import date, timedelta
 import datetime
 
@@ -563,33 +561,7 @@ def update_graph(state, radioval):
         Total_Cases = df[radioval]
 
         Day = df.groupby(['date'])[radioval].sum()
-        '''x = np.arange(len(Day))
-        y = Day.values
-        days = x.reshape(-1,1)
-
-        # Future forecasting for the next 30 days
-
-        days_in_future = 30
-        future_forecast = np.array([i for i in range(len(Day)+days_in_future)]).reshape(-1,1)
-        adjusted_dates = future_forecast[:-30]
-
-        # Converting all integers to datetime for better visuals
-        start = '2020-1-22'
-        start_date= datetime.datetime.strptime(start,'%Y-%m-%d')
-        future_dates = []
-
-
-        for i in range(len(future_forecast)):
-          future_dates.append((start_date + datetime.timedelta(days=i)).strftime('%Y-%m-%d'))
-
-        Poly = PolynomialFeatures(degree=4)
-        X = Poly.fit_transform(days)
-
-        reg = LinearRegression()
-        reg.fit(X,y)
-        y_Predict_train = reg.predict(X)
-
-        poly_pred=reg.predict(Poly.transform(future_forecast))'''
+        
 
         # Facebook Prophet Model
 
@@ -610,11 +582,7 @@ def update_graph(state, radioval):
 
         
 
-        '''trace1.append(go.Scatter(x=Dates,y=Total_Cases, mode='lines',
-            opacity=0.7,name=f'Actual Data',textposition='bottom center',marker = dict(color = 'rgba(16, 112, 2, 0.8)')))
-        trace2.append(go.Scatter(x=future_dates,y=poly_pred,mode='lines',line=dict(color='royalblue', width=4, dash='dot'),marker = dict(color = 'rgba(80, 26, 80, 0.8)'),
-            opacity=0.6,name=f'Predicted Data',textposition='bottom center'))'''
-
+        
 
 
         trace1.append(go.Scatter( name = 'Live Data',

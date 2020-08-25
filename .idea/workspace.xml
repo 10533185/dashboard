@@ -3,16 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="500927a9-cd13-48d2-a4da-c316406529a9" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dash_update.py" beforeDir="false" afterPath="$PROJECT_DIR$/Dash_update.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/dashboard_data.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/dashboard_data.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/df_us.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/df_us.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/df_us_county.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/df_us_county.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/raw/time_series_covid19_confirmed_US.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/raw/time_series_covid19_confirmed_US.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/raw/time_series_covid19_confirmed_global.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/raw/time_series_covid19_confirmed_global.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/raw/time_series_covid19_deaths_US.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/raw/time_series_covid19_deaths_US.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/raw/time_series_covid19_deaths_global.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/raw/time_series_covid19_deaths_global.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/raw/time_series_covid19_recovered_global.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/raw/time_series_covid19_recovered_global.csv" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -130,10 +121,10 @@
       <screen x="0" y="0" width="1366" height="728" />
     </state>
     <state x="186" y="9" key="SettingsEditor/0.0.1366.728@0.0.1366.728" timestamp="1597693337794" />
-    <state x="0" y="0" key="com.intellij.ide.util.TipDialog" timestamp="1598298557999">
+    <state x="0" y="0" key="com.intellij.ide.util.TipDialog" timestamp="1598332829137">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
-    <state x="0" y="0" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1598298557999" />
+    <state x="0" y="0" key="com.intellij.ide.util.TipDialog/0.0.1366.728@0.0.1366.728" timestamp="1598332829137" />
     <state x="346" y="49" width="672" height="678" key="search.everywhere.popup" timestamp="1597691082235">
       <screen x="0" y="0" width="1366" height="728" />
     </state>
