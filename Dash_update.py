@@ -9,6 +9,7 @@ import requests
 import sys
 
 
+
 def save_from_web(url):
     url = r'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/{}'.format(url)
     raw_string = requests.get(url).content

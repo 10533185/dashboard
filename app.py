@@ -59,22 +59,18 @@ region_options = {'United States': states}
 
 df_us = pd.read_csv('data/df_us.csv')
 df_us['percentage'] = df_us['percentage'].astype(str)
-
-
 df_us_counties = pd.read_csv('data/df_us_county.csv')
 df_us_counties['percentage'] = df_us_counties['percentage'].astype(str)
 df_us_counties['Country/Region'] = df_us_counties['Country/Region'].astype(str)
 
-# Model
 
+# Cumulative Confirmed Cases Indicator
 
 @app.callback(
     Output('confirmed_ind', 'figure'),
     [Input('global_format', 'value')])
 def confirmed(view):
-    '''
-    creates the CUMULATIVE CONFIRMED indicator
-    '''
+    
     if view == 'United States':
         df = df_us
     
@@ -102,13 +98,15 @@ def confirmed(view):
                 )
             }
 
+
+
+# Currently Active Indicator
+
 @app.callback(
     Output('active_ind', 'figure'),
     [Input('global_format', 'value')])
 def active(view):
-    '''
-    creates the CURRENTLY ACTIVE indicator
-    '''
+    
     if view == 'United States':
         df = df_us
     
@@ -136,13 +134,14 @@ def active(view):
                 )
             }
 
+
+# Total Recovered Cases Indicator
+
 @app.callback(
     Output('recovered_ind', 'figure'),
     [Input('global_format', 'value')])
 def recovered(view):
-    '''
-    creates the RECOVERED CASES indicator
-    '''
+    
     if view == 'United States':
         df = df_us
 
@@ -170,13 +169,15 @@ def recovered(view):
                 )
             }
 
+
+
+#Deaths to Date Indicator
+
 @app.callback(
     Output('deaths_ind', 'figure'),
     [Input('global_format', 'value')])
 def deaths(view):
-    '''
-    creates the DEATHS TO DATE indicator
-    '''
+    
     if view == 'United States':
         df = df_us
 
@@ -204,15 +205,16 @@ def deaths(view):
                 )
             }
 
+
+# Upper-Left Chart (aggregated stats for the view)
+    
+
 @app.callback(
     Output('us_trend', 'figure'),
     [Input('global_format', 'value'),
      Input('population_select', 'value')])
 def us_trend(view, population):
-    '''
-    creates the upper-left chart (aggregated stats for the view)
-    '''
-    
+       
     if view == 'United States':
         df = df_us
         df_us.loc[df_us['Country/Region'] == 'Recovered', ['population']] = 0
@@ -279,27 +281,32 @@ def us_trend(view, population):
                 )
             }
 
+
+
+# Sets Allowable options for regions in the upper-right chart drop-down
+
 @app.callback(
     Output('country_select', 'options'),
     [Input('global_format', 'value')])
 def set_active_options(selected_view):
-    '''
-    sets allowable options for regions in the upper-right chart drop-down
-    '''
+    
     return [{'label': i, 'value': i} for i in region_options[selected_view]]
+
+
+# Sets default selections for regions in the upper-right chart drop-down
 
 @app.callback(
     Output('country_select', 'value'),
     [Input('global_format', 'value'),
      Input('country_select', 'options')])
 def set_countries_value(view, available_options):
-    '''
-    sets default selections for regions in the upper-right chart drop-down
-    '''
-    
+        
     if view == 'United States':
         return ['New York', 'New Jersey', 'California', 'Texas', 'Florida', 'Georgia', 'Arizona', 'North Carolina', 'Oklahoma']
-    
+
+
+
+# creates the upper-right chart (sub-region analysis)    
 
 @app.callback(
     Output('active_states', 'figure'),
@@ -308,13 +315,9 @@ def set_countries_value(view, available_options):
      Input('column_select', 'value'),
      Input('population_select', 'value')])
 def active_countries(view, countries, column, population):
-    '''
-    creates the upper-right chart (sub-region analysis)
-    '''
-   
+       
     if view == 'United States':
-        df = df_us
-    
+        df = df_us 
 
     if population == 'absolute':
         column_label = column
@@ -369,15 +372,15 @@ def active_countries(view, countries, column, population):
                 )
             }
 
+
+# creates the lower-Left chart (map)
+
 @app.callback(
     Output('US_map', 'figure'),
     [Input('global_format', 'value'),
      Input('date_slider', 'value')])
 def world_map(view, date_index):
-    '''
-    creates the lower-left chart (map)
-    '''
-   
+      
     if view == 'United States':
         scope = 'usa'
         projection_type = 'albers usa'
@@ -429,28 +432,29 @@ def world_map(view, date_index):
             )
         }
 
+
+# converts color value in hex format to rgba format with alpha transparency
+
 def hex_to_rgba(h, alpha=1):
-    '''
-    converts color value in hex format to rgba format with alpha transparency
-    '''
+    
     return tuple([int(h.lstrip('#')[i:i+2], 16) for i in (0, 2, 4)] + [alpha])
+
+
+
+# creates the lower-right chart (trajectory)
 
 @app.callback(
     Output('trajectory', 'figure'),
     [Input('global_format', 'value'),
      Input('date_slider', 'value')])
 def trajectory(view, date_index):
-    '''
-    creates the lower-right chart (trajectory)
-    '''
-    
+        
     if view == 'United States':
         df = data[data['Country/Region'] == 'US']
         df = df.drop('Country/Region', axis=1)
         df = df.rename(columns={'Province/State': 'Country/Region'})
         scope = 'states'
-        threshold = 1000
-    
+        threshold = 1000   
 
     date = data['date'].unique()[date_index]
 
@@ -528,17 +532,17 @@ def trajectory(view, date_index):
         }
 
 
+# Fitting the data into the forecast model FBProphet
 
 @app.callback(Output('preds', 'figure'),
               [Input('my-dropdowntest', "value"), Input("radiopred", "value")])
 def update_graph(state, radioval):
     dropdown = {"New York": "Newyork","California": "California","Colorado": "Colorado","Washington": "Washington","Alaska": "Alaska","Arizona": "Arizona","Arkansas": "Arkansas","Connecticut": "Connecticut","Delaware": "Delaware","District of Columbia": "District of Columbia","Florida": "Florida","Georgia": "Georgia","Hawaii": "Hawaii","Texas": "Texas","Illinois": "Illinois","New Jersey": "New Jersey","New Mexico": "New Mexico","Virginia": "Virginia","Indiana": "Indiana","Ohio": "Ohio",}
-    radio = {"Confirmed": "Total Cases", "Recovered": "Recovery", "Deaths": "Deaths", }
+    radio = {"Confirmed": "Confirmed Cases", "Recovered": "Recovered", "Deaths": "Deaths", }
     trace1 = []
     trace2 = []
     trace3 = []
-    trace4 = []
-    
+    trace4 = []  
     
 
 
@@ -557,8 +561,16 @@ def update_graph(state, radioval):
 
         df = df_us[(df_us['Country/Region'] == state)]
 
-        Dates = df['date']
+        
+
+        if (radioval == "Recovered"):
+            df = df_us.loc[(df_us[['Recovered']] != 0).all(axis=1)]
+
+        
+
+
         Total_Cases = df[radioval]
+        Dates = df['date']
 
         Day = df.groupby(['date'])[radioval].sum()
         
@@ -575,12 +587,10 @@ def update_graph(state, radioval):
         # Fit Model
         m.fit(train)
         # Future Date
-        future_dates = m.make_future_dataframe(periods=60)
+        future_dates = m.make_future_dataframe(periods=120)
 
         # Prediction
-        prediction =  m.predict(future_dates)
-
-        
+        prediction =  m.predict(future_dates)     
 
         
 
@@ -622,7 +632,6 @@ def update_graph(state, radioval):
     line= dict(color='#1705ff')
 ))
 
-
         traces = [trace1, trace2, trace4, trace3]
         data = [val for sublist in traces for val in sublist]
         figure = {'data': data,
@@ -636,6 +645,10 @@ def update_graph(state, radioval):
         plot_bgcolor='rgba(0,0,0,0)')}
     return figure
 
+
+
+
+# Page Layout
 
 app.layout  = html.Div([ html.H1(children='Welcome to COVID-19 Dashboard USA',
         style={
@@ -818,16 +831,23 @@ app.layout  = html.Div([ html.H1(children='Welcome to COVID-19 Dashboard USA',
 ,
 ]), 
 dcc.Tab(label='Forecast', children=[
-html.Div([html.H1("Machine Learning", style={"textAlign": "center"}), html.H2("Model Forecast", style={"textAlign": "left"}),
+html.Div([html.H1("Machine Learning", style={"textAlign": "center"}), html.H2("Forecast for 120 days", style={"textAlign": "left"}),
     dcc.Dropdown(id='my-dropdowntest',value="New York",options=[{'label': 'Newyork', 'value': 'New York'},{'label': 'California', 'value': 'California'},{'label': 'Colorado', 'value': 'Colorado'},{'label': 'Washington', 'value': 'Washington'},{'label': 'Alaska', 'value': 'Alaska'},{'label': 'Arizona', 'value': 'Arizona'},{'label': 'Arkansas', 'value': 'Arkansas'},{'label': 'Connecticut', 'value': 'Connecticut'},{'label': 'Delaware', 'value': 'Delaware'},{'label': 'District of Columbia', 'value': 'District of Columbia'},{'label': 'Florida', 'value': 'Florida'},{'label': 'Georgia', 'value': 'Georgia'},{'label': 'Hawaii', 'value': 'Hawaii'},{'label': 'Texas', 'value': 'Texas'},{'label': 'Illinois', 'value': 'Illinois'},{'label': 'New Jersey', 'value': 'New Jersey'},{'label': 'New Mexico', 'value': 'New Mexico'},{'label': 'Virginia', 'value': 'Virginia'},{'label': 'Indiana', 'value': 'Indiana'},{'label': 'Ohio', 'value': 'Ohio'}],
                 style={"display": "block", "margin-left": "auto", "margin-right": "auto", "width": "50%"}),
           dcc.RadioItems(id="radiopred", value="Confirmed", labelStyle={'display': 'inline-block', 'padding': 10},
-                         options=[{'label': "Total Cases", 'value': "Confirmed"}, {'label': "Recovery", 'value': "Recovered"},
+                         options=[{'label': "Confirmed Cases", 'value': "Confirmed"}, {'label': "Recovered", 'value': "Recovered"},
                                   {'label': "Deaths", 'value': "Deaths"}], style={'textAlign': "center", }),
  
     dcc.Graph(id='preds'), 
+     html.Div(dcc.Markdown('Note : Model Forecast Recovered Cases only for whole country'),
+        style={
+            'textAlign': 'center',
+            'color': dash_colors['text'],
+            'width': '100%',
+            'float': 'center',
+            'display': 'inline-block'}), 
 ],)
-], className="container")
+], className="container")   
 ])
 ])
 
